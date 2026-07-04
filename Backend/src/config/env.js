@@ -55,10 +55,9 @@ module.exports = {
   hrDefaultNationalId: process.env.HR_DEFAULT_NATIONAL_ID || '000000',
 
   // Auto-create the default admin on a successful DB connection when no admin
-  // exists yet. Defaults ON in production (so Render needs no manual seed) and
-  // OFF otherwise; override explicitly with AUTO_SEED_ADMIN=true|false.
-  autoSeedAdmin:
-    process.env.AUTO_SEED_ADMIN != null
-      ? String(process.env.AUTO_SEED_ADMIN).toLowerCase() === 'true'
-      : nodeEnv === 'production',
+  // exists yet. Defaults ON everywhere so a fresh cloud DB (e.g. Render + Atlas)
+  // self-heals with no manual seed and without depending on NODE_ENV being set.
+  // Disable only by explicitly setting AUTO_SEED_ADMIN=false. The operation is
+  // idempotent, so leaving it on is safe on every boot.
+  autoSeedAdmin: String(process.env.AUTO_SEED_ADMIN ?? 'true').toLowerCase() !== 'false',
 };
