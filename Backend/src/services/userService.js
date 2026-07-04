@@ -1,4 +1,6 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const env = require('../config/env');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -36,4 +38,47 @@ async function listHrStaff() {
     .sort({ fullName: 1 });
 }
 
-module.exports = { createEmployee, listHrStaff };
+/**
+ * Idempotently ensures the default admin login exists. Safe to call on every
+ * boot: if a user with the default username is already present it does nothing
+ * (never resets an existing password). Otherwise it creates the ADMIN account
+ * with a bcrypt-hashed password — the same hashing used by `npm run seed` and
+ * the normal login flow.
+ *
+ * @returns {Promise<{ created: boolean, username: string, usedFallbackPassword: boolean }>}
+ */
+async function ensureDefaultAdmin() {
+  const username = env.hrDefaultUsername;
+
+  const existing = await User.findOne({ username });
+  if (existing) {
+    return { created: false, username, usedFallbackPassword: false };
+  }
+
+  const passwordHash = await bcrypt.hash(env.hrDefaultPassword, env.bcryptSaltRounds);
+
+  try {
+    const admin = await User.create({
+      fullName: 'System Administrator',
+      nickname: 'Admin',
+      nationalIdLast6: env.hrDefaultNationalId,
+      role: 'ADMIN',
+      username,
+      passwordHash,
+    });
+    return {
+      created: true,
+      username: admin.username,
+      usedFallbackPassword: env.hrDefaultPasswordIsFallback,
+    };
+  } catch (err) {
+    // A concurrent worker may have created it first (unique index race) — that's
+    // fine, the account exists either way.
+    if (err.code === 11000) {
+      return { created: false, username, usedFallbackPassword: false };
+    }
+    throw err;
+  }
+}
+
+module.exports = { createEmployee, listHrStaff, ensureDefaultAdmin };

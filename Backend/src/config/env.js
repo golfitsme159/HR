@@ -45,7 +45,20 @@ module.exports = {
   // Password hashing
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS) || 10,
 
-  // Default HR/Admin credentials used by the seed script (npm run seed)
+  // Default HR/Admin credentials used by the seed script (npm run seed) and by
+  // the on-boot auto-seed (see userService.ensureDefaultAdmin).
   hrDefaultUsername: (process.env.HR_DEFAULT_USERNAME || 'admin').toLowerCase(),
   hrDefaultPassword: process.env.HR_DEFAULT_PASSWORD || 'ChangeMe123!',
+  // True when the admin password falls back to the built-in default (i.e. no
+  // HR_DEFAULT_PASSWORD was provided) — used to warn loudly in production.
+  hrDefaultPasswordIsFallback: !process.env.HR_DEFAULT_PASSWORD,
+  hrDefaultNationalId: process.env.HR_DEFAULT_NATIONAL_ID || '000000',
+
+  // Auto-create the default admin on a successful DB connection when no admin
+  // exists yet. Defaults ON in production (so Render needs no manual seed) and
+  // OFF otherwise; override explicitly with AUTO_SEED_ADMIN=true|false.
+  autoSeedAdmin:
+    process.env.AUTO_SEED_ADMIN != null
+      ? String(process.env.AUTO_SEED_ADMIN).toLowerCase() === 'true'
+      : nodeEnv === 'production',
 };
