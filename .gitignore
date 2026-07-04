@@ -1,0 +1,39 @@
+# ---------------------------------------------------------------------------
+# Root .gitignore — global safety net for the Nilecon-HR monorepo.
+# Sub-folder rules also live in Backend/.gitignore and Frontend/.gitignore.
+# ---------------------------------------------------------------------------
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment / secrets  (keep .env.example, ignore real .env files)
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+.vite/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

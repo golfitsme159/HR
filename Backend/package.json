@@ -1,0 +1,36 @@
+{
+  "name": "nilecon-hr-backend",
+  "version": "1.0.0",
+  "description": "WFH and Leave Management backend for a LINE LIFF app (Node.js, Express, MongoDB)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node src/scripts/seed.js"
+  },
+  "keywords": [
+    "line",
+    "liff",
+    "wfh",
+    "leave-management",
+    "express",
+    "mongoose"
+  ],
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@line/bot-sdk": "^11.0.0",
+    "axios": "^1.7.2",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.4.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+  }
+}
