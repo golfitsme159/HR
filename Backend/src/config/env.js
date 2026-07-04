@@ -1,5 +1,25 @@
 require('dotenv').config();
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+const isProduction = nodeEnv === 'production';
+
+// MongoDB connection string. Accept both MONGODB_URI (the Render/Atlas
+// convention) and the legacy MONGO_URI, preferring MONGODB_URI. There is NO
+// hardcoded localhost fallback in production: if the platform env var is missing
+// we fail loudly at boot instead of silently connecting to 127.0.0.1 (the cause
+// of the Render fallback). Localhost is only used outside production for dev.
+const mongoUri =
+  process.env.MONGODB_URI ||
+  process.env.MONGO_URI ||
+  (isProduction ? '' : 'mongodb://127.0.0.1:27017/nilecon_hr');
+
+if (!mongoUri) {
+  throw new Error(
+    'Missing MongoDB connection string. Set MONGODB_URI (preferred) or MONGO_URI ' +
+      'in the environment.'
+  );
+}
+
 const lineChannelId = process.env.LINE_CHANNEL_ID || '';
 
 // Mock mode is on if explicitly enabled OR if no channel id is configured.
@@ -7,9 +27,9 @@ const lineMockEnabled =
   String(process.env.LINE_MOCK_ENABLED).toLowerCase() === 'true' || !lineChannelId;
 
 module.exports = {
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
   port: Number(process.env.PORT) || 4000,
-  mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/nilecon_hr',
+  mongoUri,
 
   // LINE
   lineChannelId,
