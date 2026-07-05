@@ -46,3 +46,19 @@ export const config = {
 
 // True when we should skip the real LIFF SDK (no LIFF id, or a dev token given).
 export const isLiffBypassed = Boolean(config.devLineToken) || !config.liffId;
+
+// Production safety net: if LIFF isn't configured, the employee flow would
+// silently ship the "Dev Employee" placeholder with an invalid token (backend
+// then rejects it as "JWS format error"). Warn loudly at load. The hard failure
+// is enforced in lib/liff.js (scoped to the employee entrypoint) so the HR
+// console, which doesn't use LIFF, still works without VITE_LIFF_ID.
+if (import.meta.env.PROD && isLiffBypassed) {
+  // eslint-disable-next-line no-console
+  console.error(
+    '[config] LINE LIFF is not configured for this production build: ' +
+      'VITE_LIFF_ID is missing' +
+      (config.devLineToken ? ' (or VITE_DEV_LINE_TOKEN is set, forcing bypass)' : '') +
+      '. The employee LINE flow will refuse to run until VITE_LIFF_ID is set ' +
+      'and VITE_DEV_LINE_TOKEN removed, then redeployed.'
+  );
+}

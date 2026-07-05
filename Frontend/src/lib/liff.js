@@ -25,6 +25,16 @@ function ensureInit() {
  */
 export async function initLiff({ loginIfNeeded = true } = {}) {
   if (isLiffBypassed) {
+    // Production guard: never silently bypass LIFF in a production build — that
+    // ships the "Dev Employee" placeholder and an invalid token. Fail loudly so
+    // the misconfiguration is obvious (the HR console is unaffected).
+    if (import.meta.env.PROD) {
+      throw new Error(
+        'LINE LIFF is not configured for production. Set VITE_LIFF_ID (and remove ' +
+          'VITE_DEV_LINE_TOKEN) on the host, then redeploy. Refusing to bypass LIFF ' +
+          'with the "Dev Employee" placeholder in production.'
+      );
+    }
     return {
       idToken: config.devLineToken || 'emp-somchai',
       profile: { userId: 'dev', displayName: 'Dev Employee' },
