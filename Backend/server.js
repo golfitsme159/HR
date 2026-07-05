@@ -1,10 +1,23 @@
 const app = require('./src/app');
 const env = require('./src/config/env');
 const connectDB = require('./src/config/db');
+const User = require('./src/models/User');
 const { ensureDefaultAdmin } = require('./src/services/userService');
 
 async function bootstrap() {
   await connectDB();
+
+  // Reconcile indexes so schema changes take effect on an EXISTING database.
+  // createIndex won't modify an index that already exists with different
+  // options, so the old sparse+unique lineUserId index (which broke multi-
+  // employee pre-registration) must be dropped and rebuilt as the partial
+  // index. syncIndexes() does exactly that. Best-effort: log but don't block.
+  try {
+    await User.syncIndexes();
+    console.log('[server] User indexes synced (lineUserId partial index applied).');
+  } catch (err) {
+    console.error('[server] User index sync failed:', err.message);
+  }
 
   // Auto-provision the default admin so a fresh cloud DB (e.g. Render + Atlas)
   // has a working HR login without a manual `npm run seed`. Idempotent and

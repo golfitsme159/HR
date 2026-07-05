@@ -23,12 +23,13 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\d{6}$/, 'nationalIdLast6 must be exactly 6 digits'],
     },
-    // Populated once the employee links their LINE account. Sparse + unique so
-    // multiple un-linked (null) users are allowed but a LINE id maps to one user.
+    // Populated once the employee links their LINE account. Uniqueness is
+    // enforced by a PARTIAL index (see below), not `unique`/`sparse` here:
+    // pre-registered employees all carry an explicit `null` (default), and a
+    // sparse index still indexes null values — so multiple unlinked employees
+    // would collide. The partial index keys only real (string) LINE ids.
     lineUserId: {
       type: String,
-      unique: true,
-      sparse: true,
       default: null,
     },
     role: {
@@ -71,6 +72,16 @@ const userSchema = new mongoose.Schema(
       },
     },
   }
+);
+
+// Partial unique index: enforce uniqueness only for actual (string) LINE ids so
+// any number of pre-registered employees can share a null lineUserId, while a
+// linked LINE id still maps to at most one user. Replaces the old sparse+unique
+// index (which failed because `default: null` makes the field an explicit null
+// that a sparse index still enforces on).
+userSchema.index(
+  { lineUserId: 1 },
+  { unique: true, partialFilterExpression: { lineUserId: { $type: 'string' } } }
 );
 
 userSchema.virtual('isLinked').get(function isLinked() {
