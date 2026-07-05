@@ -37,4 +37,8 @@ export const hrApi = {
     client.post('/hr/leave/approve', { requestId, status }).then(unwrap),
   staff: () => client.get('/hr/staff').then(unwrap),
   createEmployee: (payload) => client.post('/hr/employees', payload).then(unwrap),
+  // Employee CRUD (HR/Admin only).
+  listEmployees: () => client.get('/employees').then(unwrap),
+  updateEmployee: (id, payload) => client.put(`/employees/${id}`, payload).then(unwrap),
+  deleteEmployee: (id) => client.delete(`/employees/${id}`).then(unwrap),
 };

@@ -3,6 +3,7 @@ const authRoutes = require('./authRoutes');
 const wfhRoutes = require('./wfhRoutes');
 const leaveRoutes = require('./leaveRoutes');
 const hrRoutes = require('./hrRoutes');
+const employeeRoutes = require('./employeeRoutes');
 
 const router = express.Router();
 
@@ -14,5 +15,6 @@ router.use('/auth', authRoutes);
 router.use('/wfh', wfhRoutes);
 router.use('/leave', leaveRoutes);
 router.use('/hr', hrRoutes);
+router.use('/employees', employeeRoutes);
 
 module.exports = router;
